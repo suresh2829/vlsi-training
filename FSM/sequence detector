@@ -1,0 +1,80 @@
+module sequence_detector (
+    input clk,
+    input rst,
+    input x,         // Serial input bit
+    output reg y     // Output: 1 when sequence 1011 is detected
+);
+
+    // State encoding
+    typedef enum logic [2:0] {
+        S0 = 3'b000,  // Initial state
+        S1 = 3'b001,  // Detected '1'
+        S2 = 3'b010,  // Detected '10'
+        S3 = 3'b011,  // Detected '101'
+        S4 = 3'b100   // Detected '1011'
+    } state_t;
+
+    state_t current_state, next_state;
+
+    // Sequential logic: state transition
+    always @(posedge clk or posedge rst) begin
+        if (rst)
+            current_state <= S0;
+        else
+            current_state <= next_state;
+    end
+
+    // Combinational logic: next state and output
+    always @(*) begin
+        // Default output
+        y = 0;
+        case (current_state)
+            S0: next_state = x ? S1 : S0;
+            S1: next_state = x ? S1 : S2;
+            S2: next_state = x ? S3 : S0;
+            S3: next_state = x ? S4 : S2;
+            S4: begin
+                next_state = x ? S1 : S2;
+                y = 1;  // Sequence detected
+            end
+            default: next_state = S0;
+        endcase
+    end
+endmodule
+
+// testbench
+
+module test_sequence_detector;
+    reg clk, rst, x;
+    wire y;
+
+    sequence_detector uut (
+        .clk(clk),
+        .rst(rst),
+        .x(x),
+        .y(y)
+    );
+
+    // Clock generation
+    initial begin
+        clk = 0;
+        forever #5 clk = ~clk;
+    end
+
+    // Input sequence: 1 0 1 1 → should trigger y = 1
+    initial begin
+        $display("Time x | y");
+        $monitor("%4t  %b | %b", $time, x, y);
+
+        rst = 1; x = 0;
+        #10 rst = 0;
+        #10 x = 1;
+        #10 x = 0;
+        #10 x = 1;
+        #10 x = 1;  // y should go high here
+        #10 x = 0;
+        #10 x = 1;
+        #10 x = 1;  // y should go high again
+        #10 $finish;
+    end
+endmodule
