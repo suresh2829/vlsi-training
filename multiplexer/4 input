@@ -1,0 +1,33 @@
+module mux4_behavioral (
+    input [3:0] D,     // 4 data inputs: D[0] to D[3]
+    input [1:0] Sel,   // 2-bit select input
+    output Y           // Output
+);
+    assign Y = D[Sel]; // Select one of the inputs based on Sel
+endmodule
+
+// testbench
+
+module test_mux4;
+    reg [3:0] D;
+    reg [1:0] Sel;
+    wire Y;
+
+    // Instantiate the MUX
+    mux4_behavioral uut (
+        .D(D),
+        .Sel(Sel),
+        .Y(Y)
+    );
+
+    initial begin
+        $display("D Sel | Y");
+        $monitor("%b %b | %b", D, Sel, Y);
+
+        D = 4'b0001; Sel = 2'b00;
+        #10 D = 4'b0010; Sel = 2'b01;
+        #10 D = 4'b0100; Sel = 2'b10;
+        #10 D = 4'b1000; Sel = 2'b11;
+        #10 $finish;
+    end
+endmodule
