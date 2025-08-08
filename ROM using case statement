@@ -1,0 +1,63 @@
+module rom_case (
+    input [3:0] addr,       // 4-bit address (16 locations)
+    output reg [7:0] data   // 8-bit data output
+);
+
+    always @(*) begin
+        case (addr)
+            4'h0: data = 8'hA1;
+            4'h1: data = 8'hB2;
+            4'h2: data = 8'hC3;
+            4'h3: data = 8'hD4;
+            4'h4: data = 8'hE5;
+            4'h5: data = 8'hF6;
+            4'h6: data = 8'h07;
+            4'h7: data = 8'h18;
+            4'h8: data = 8'h29;
+            4'h9: data = 8'h3A;
+            4'hA: data = 8'h4B;
+            4'hB: data = 8'h5C;
+            4'hC: data = 8'h6D;
+            4'hD: data = 8'h7E;
+            4'hE: data = 8'h8F;
+            4'hF: data = 8'h90;
+            default: data = 8'h00;
+        endcase
+    end
+endmodule
+
+// testbench
+
+module test_rom_case;
+    reg [3:0] addr;
+    wire [7:0] data;
+
+    rom_case uut (
+        .addr(addr),
+        .data(data)
+    );
+
+    initial begin
+        $display("Addr | Data");
+        $monitor("%4h | %2h", addr, data);
+
+        addr = 4'h0; #10;
+        addr = 4'h1; #10;
+        addr = 4'h2; #10;
+        addr = 4'h3; #10;
+        addr = 4'h4; #10;
+        addr = 4'h5; #10;
+        addr = 4'h6; #10;
+        addr = 4'h7; #10;
+        addr = 4'h8; #10;
+        addr = 4'h9; #10;
+        addr = 4'hA; #10;
+        addr = 4'hB; #10;
+        addr = 4'hC; #10;
+        addr = 4'hD; #10;
+        addr = 4'hE; #10;
+        addr = 4'hF; #10;
+        addr = 4'hF + 1; #10;  // Out-of-range test
+        $finish;
+    end
+endmodule
