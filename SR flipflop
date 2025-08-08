@@ -1,0 +1,55 @@
+module sr_flipflop (
+    input S, R,       // Set and Reset inputs
+    input clk,        // Clock input
+    input rst,        // Asynchronous reset
+    output reg Q      // Output
+);
+    always @(posedge clk or posedge rst) begin
+        if (rst)
+            Q <= 0;
+        else begin
+            case ({S, R})
+                2'b00: Q <= Q;       // No change
+                2'b01: Q <= 0;       // Reset
+                2'b10: Q <= 1;       // Set
+                2'b11: Q <= 1'bx;    // Invalid condition
+            endcase
+        end
+    end
+endmodule
+
+// testbench
+
+module test_sr_flipflop;
+    reg S, R, clk, rst;
+    wire Q;
+
+    sr_flipflop uut (
+        .S(S), .R(R),
+        .clk(clk),
+        .rst(rst),
+        .Q(Q)
+    );
+
+    // Clock generation
+    initial begin
+        clk = 0;
+        forever #5 clk = ~clk;  // 10 time units clock period
+    end
+
+    // Test sequence
+    initial begin
+        $display("Time S R rst | Q");
+        $monitor("%4t  %b %b  %b  | %b", $time, S, R, rst, Q);
+
+        rst = 1; S = 0; R = 0;
+        #10 rst = 0;
+        #10 S = 1; R = 0;  // Set
+        #10 S = 0; R = 1;  // Reset
+        #10 S = 0; R = 0;  // Hold
+        #10 S = 1; R = 1;  // Invalid
+        #10 rst = 1;
+        #10 rst = 0;
+        #10 $finish;
+    end
+endmodule
