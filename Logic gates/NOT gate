@@ -1,0 +1,28 @@
+module not_gate_gate_level (
+    input A,
+    output Y
+);
+    not (Y, A);  // Built-in NOT gate
+endmodule
+
+// testbench
+
+module test_not_gate;
+    reg A;
+    wire Y;
+
+    // Instantiate the NOT gate
+    not_gate_behavioral uut (
+        .A(A),
+        .Y(Y)
+    );
+
+    initial begin
+        $display("A | Y");
+        $monitor("%b | %b", A, Y);
+
+        A = 0;
+        #10 A = 1;
+        #10 $finish;
+    end
+endmodule
