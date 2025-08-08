@@ -1,0 +1,32 @@
+module or_gate_gate_level (
+    input A,
+    input B,
+    output Y
+);
+    or (Y, A, B);  // Built-in OR gate
+endmodule
+
+//testbench
+
+module test_or_gate;
+    reg A, B;
+    wire Y;
+
+    // Instantiate the OR gate
+    or_gate_behavioral uut (
+        .A(A),
+        .B(B),
+        .Y(Y)
+    );
+
+    initial begin
+        $display("A B | Y");
+        $monitor("%b %b | %b", A, B, Y);
+
+        A = 0; B = 0;
+        #10 A = 0; B = 1;
+        #10 A = 1; B = 0;
+        #10 A = 1; B = 1;
+        #10 $finish;
+    end
+endmodule
