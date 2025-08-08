@@ -1,0 +1,48 @@
+module d_flipflop (
+    input D,        // Data input
+    input clk,      // Clock input
+    input rst,      // Asynchronous reset
+    output reg Q    // Output
+);
+    always @(posedge clk or posedge rst) begin
+        if (rst)
+            Q <= 0;
+        else
+            Q <= D;
+    end
+endmodule
+
+// testbench
+
+module test_d_flipflop;
+    reg D, clk, rst;
+    wire Q;
+
+    d_flipflop uut (
+        .D(D),
+        .clk(clk),
+        .rst(rst),
+        .Q(Q)
+    );
+
+    // Clock generation
+    initial begin
+        clk = 0;
+        forever #5 clk = ~clk;  // 10 time units clock period
+    end
+
+    // Test sequence
+    initial begin
+        $display("Time D rst | Q");
+        $monitor("%4t  %b  %b  | %b", $time, D, rst, Q);
+
+        rst = 1; D = 0;
+        #10 rst = 0;
+        #10 D = 1;
+        #10 D = 0;
+        #10 D = 1;
+        #10 rst = 1;
+        #10 rst = 0;
+        #10 $finish;
+    end
+endmodule
