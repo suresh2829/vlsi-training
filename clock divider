@@ -1,0 +1,53 @@
+module clock_divider #(
+    parameter N = 4  // Divide by N (must be > 0)
+)(
+    input clk,       // Input clock
+    input rst,       // Asynchronous reset
+    output reg clk_out  // Divided clock output
+);
+    reg [$clog2(N)-1:0] count;
+
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            count <= 0;
+            clk_out <= 0;
+        end else begin
+            if (count == N-1) begin
+                count <= 0;
+                clk_out <= ~clk_out;  // Toggle output clock
+            end else begin
+                count <= count + 1;
+            end
+        end
+    end
+endmodule
+
+// testbench
+
+module test_clock_divider;
+    reg clk, rst;
+    wire clk_out;
+
+    // Instantiate divider with N = 4
+    clock_divider #(.N(4)) uut (
+        .clk(clk),
+        .rst(rst),
+        .clk_out(clk_out)
+    );
+
+    // Clock generation
+    initial begin
+        clk = 0;
+        forever #5 clk = ~clk;  // 10 time units clock period
+    end
+
+    // Test sequence
+    initial begin
+        $display("Time rst | clk_out");
+        $monitor("%4t  %b   |   %b", $time, rst, clk_out);
+
+        rst = 1;
+        #10 rst = 0;
+        #100 $finish;
+    end
+endmodule
