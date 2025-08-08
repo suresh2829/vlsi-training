@@ -1,0 +1,35 @@
+module demux1to2_behavioral (
+    input D,       // Data input
+    input Sel,     // Select line
+    output Y0,     // Output 0
+    output Y1      // Output 1
+);
+    assign Y0 = (~Sel) & D;  // If Sel=0, D goes to Y0
+    assign Y1 = Sel & D;     // If Sel=1, D goes to Y1
+endmodule
+
+// testbench
+
+module test_demux1to2;
+    reg D, Sel;
+    wire Y0, Y1;
+
+    // Instantiate the DEMUX
+    demux1to2_behavioral uut (
+        .D(D),
+        .Sel(Sel),
+        .Y0(Y0),
+        .Y1(Y1)
+    );
+
+    initial begin
+        $display("D Sel | Y0 Y1");
+        $monitor("%b  %b  |  %b  %b", D, Sel, Y0, Y1);
+
+        D = 0; Sel = 0;
+        #10 D = 1; Sel = 0;
+        #10 D = 1; Sel = 1;
+        #10 D = 0; Sel = 1;
+        #10 $finish;
+    end
+endmodule
