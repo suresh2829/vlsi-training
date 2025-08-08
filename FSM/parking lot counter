@@ -1,0 +1,58 @@
+module parking_lot_counter #(
+    parameter MAX_CAPACITY = 8  // Total parking spots
+)(
+    input clk,
+    input rst,
+    input entry,    // Car entering
+    input exit,     // Car exiting
+    output reg [$clog2(MAX_CAPACITY+1)-1:0] count,  // Car count
+    output reg full,
+    output reg empty
+);
+
+    // FSM states
+    typedef enum logic [1:0] {
+        IDLE   = 2'b00,
+        ENTER  = 2'b01,
+        EXIT   = 2'b10
+    } state_t;
+
+    state_t current_state, next_state;
+
+    // State transition
+    always @(posedge clk or posedge rst) begin
+        if (rst)
+            current_state <= IDLE;
+        else
+            current_state <= next_state;
+    end
+
+    // Next state logic
+    always @(*) begin
+        case (current_state)
+            IDLE:  next_state = entry ? ENTER : (exit ? EXIT : IDLE);
+            ENTER: next_state = IDLE;
+            EXIT:  next_state = IDLE;
+            default: next_state = IDLE;
+        endcase
+    end
+
+    // Counter logic
+    always @(posedge clk or posedge rst) begin
+        if (rst)
+            count <= 0;
+        else begin
+            case (next_state)
+                ENTER: if (count < MAX_CAPACITY) count <= count + 1;
+                EXIT:  if (count > 0) count <= count - 1;
+                default: count <= count;
+            endcase
+        end
+    end
+
+    // Status flags
+    always @(*) begin
+        full  = (count == MAX_CAPACITY);
+        empty = (count == 0);
+    end
+endmodule
